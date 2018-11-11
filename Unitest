@@ -1,0 +1,335 @@
+#include <SoftwareSerial.h>
+
+/* void loop() {
+  if(Serial.available() > 0) {
+    int x = 0;
+    int y = 0;
+    int i;
+    for (i=1; i<=4; i++) {
+      state = Serial.read();
+      if (i == 1)
+        x += state / 1000 * pow(2, 31) + state / 100 % 10 * pow(2, 30) + state / 10 % 10 * pow(2, 29) + state % 10 * pow(2, 28) +
+             + state / 1000 * pow(2, 27) + state / 100 % 10 * pow(2, 36) + state / 10 % 10 * pow(2, 25) + state % 10 * pow(2, 24);
+      else if (i == 2)
+        x += state / 1000 * pow(2, 23) + state / 100 % 10 * pow(2, 22) + state / 10 % 10 * pow(2, 21) + state % 10 * pow(2, 20) +
+             + state / 1000 * pow(2, 19) + state / 100 % 10 * pow(2, 18) + state / 10 % 10 * pow(2, 17) + state % 10 * pow(2, 16);
+      else if (i == 3)
+        x += state / 1000 * pow(2, 15) + state / 100 % 10 * pow(2, 14) + state / 10 % 10 * pow(2, 13) + state % 10 * pow(2, 12) +
+             + state / 1000 * pow(2, 11) + state / 100 % 10 * pow(2, 10) + state / 10 % 10 * pow(2, 9) + state % 10 * pow(2, 8); 
+      else if (i == 4)
+        x += state / 1000 * pow(2, 7) + state / 100 % 10 * pow(2, 6) + state / 10 % 10 * pow(2, 5) + state % 10 * pow(2, 4) +
+             + state / 1000 * pow(2, 3) + state / 100 % 10 * pow(2, 2) + state / 10 % 10 * pow(2, 1) + state % 10 * pow(2, 0); 
+    }
+    for (i=1; i<=4; i++) {
+      state = Serial.read();
+      if (i == 1)
+        y += state / 1000 * pow(2, 31) + state / 100 % 10 * pow(2, 30) + state / 10 % 10 * pow(2, 29) + state % 10 * pow(2, 28) +
+             + state / 1000 * pow(2, 27) + state / 100 % 10 * pow(2, 36) + state / 10 % 10 * pow(2, 25) + state % 10 * pow(2, 24); 
+      else if (i == 2)
+        y += state / 1000 * pow(2, 23) + state / 100 % 10 * pow(2, 22) + state / 10 % 10 * pow(2, 21) + state % 10 * pow(2, 20) +
+             + state / 1000 * pow(2, 19) + state / 100 % 10 * pow(2, 18) + state / 10 % 10 * pow(2, 17) + state % 10 * pow(2, 16);
+      else if (i == 3)
+        y += state / 1000 * pow(2, 15) + state / 100 % 10 * pow(2, 14) + state / 10 % 10 * pow(2, 13) + state % 10 * pow(2, 12) +
+             + state / 1000 * pow(2, 11) + state / 100 % 10 * pow(2, 10) + state / 10 % 10 * pow(2, 9) + state % 10 * pow(2, 8); 
+      else if (i == 4)
+        y += state / 1000 * pow(2, 7) + state / 100 % 10 * pow(2, 6) + state / 10 % 10 * pow(2, 5) + state % 10 * pow(2, 4) +
+             + state / 1000 * pow(2, 3) + state / 100 % 10 * pow(2, 2) + state / 10 % 10 * pow(2, 1) + state % 10 * pow(2, 0); 
+    }
+    double var = atan((double)x/y);
+    
+   }
+    
+}*/
+
+//Channel 1 (fL) - PWM (pin 6), DIR (pin 8) 
+
+//Channel 2 (fR) - PWM (pin 9), DIR (pin 4) 
+
+//Channel 3 (bL) - PWM (pin 5), DIR (pin 13) 
+
+//Channel 4 (bR) - PWM (pin 3), DIR (pin 12)  
+
+int PinPWM_bL = 5;   
+int PinPWM_bR = 3;   
+int PinPWM_fL = 6;  
+int PinPWM_fR = 9;  
+
+int PinRot_bL = 13;   
+int PinRot_bR = 12;   
+int PinRot_fL = 8;   
+int PinRot_fR = 4; 
+
+int state;
+int angle = 0;
+int direct = 0;
+
+void setup()
+{
+  Serial.begin(9600); // Default connection rate for my BT module
+
+  pinMode(PinPWM_bL,OUTPUT);    // back left motor pwm
+  pinMode(PinPWM_bR,OUTPUT);   // back right motor pwm
+  pinMode(PinPWM_fL,OUTPUT);   // front left motor pwm
+  pinMode(PinPWM_fR,OUTPUT);    // front right motor pwm
+
+  pinMode(PinRot_bL,OUTPUT);     // back left motor dir
+  pinMode(PinRot_bR,OUTPUT);     // back right motor dir
+  pinMode(PinRot_fL,OUTPUT);     // front left motor dir
+  pinMode(PinRot_fR,OUTPUT);     // front right motor dir
+}
+
+void loop() {
+  /*if(Serial.available() > 0) {
+    int i;
+    int power = 31;
+    for (i=1; i<=4; i++) {
+      state = Serial.read();
+      for(int j=7;j>=0;j--)
+         {
+         angle += state / (int)pow(10,j) % 10 * pow(2,power);
+         power--;
+         }
+    }
+    power = 31;
+    for (i=1; i<=4; i++) {
+      state = Serial.read();
+      for(int j=7;j>=0;j--)
+         {
+         direct += state / (int)pow(10,j) % 10 * pow(2,power);
+         power--;
+         }
+    }
+  }
+  /*if (direct == 2) {
+  if (angle<45)
+  else if ((angle>=45) && (angle<90))
+  else if ((angle>=90) && (angle<135))
+  else if ((angle>=135) && (angle<180))
+  else if ((angle>=180) && (angle<225))
+  else if ((angle>=225) && (angle<270))
+  else if ((angle>=270) && (angle<315))
+  else if ((angle>=315) && (angle<360))
+  }
+  
+  // rotation without moving backwards or forwards
+  else */ 
+  direct = 0;
+  angle=285;
+  
+  
+  if (direct == 0) {
+  if (angle<45)
+  {
+  digitalWrite(PinRot_fR,HIGH);   // turn right motors 
+  digitalWrite(PinRot_bR,LOW);  
+  digitalWrite(PinRot_fL,LOW);   // turn left motors
+  digitalWrite(PinRot_bL,HIGH); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(2000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);
+  }
+  else if ((angle>=45) && (angle<90))
+  {
+  digitalWrite(PinRot_fR,HIGH);   // turn right motors 
+  digitalWrite(PinRot_bR,LOW);  
+  digitalWrite(PinRot_fL,LOW);   // turn left motors
+  digitalWrite(PinRot_bL,HIGH); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(4000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  else if ((angle>=90) && (angle<135))
+  {
+  digitalWrite(PinRot_fR,HIGH);   // turn right motors 
+  digitalWrite(PinRot_bR,LOW);  
+  digitalWrite(PinRot_fL,LOW);   // turn left motors
+  digitalWrite(PinRot_bL,HIGH); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(6000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  else if ((angle>=135) && (angle<180))
+  {
+  digitalWrite(PinRot_fR,HIGH);   // turn right motors 
+  digitalWrite(PinRot_bR,LOW);  
+  digitalWrite(PinRot_fL,LOW);   // turn left motors
+  digitalWrite(PinRot_bL,HIGH); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(8000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  else if ((angle>=180) && (angle<225))
+  {
+  digitalWrite(PinRot_fR,LOW);    // turn right motors
+  digitalWrite(PinRot_bR,HIGH);  
+  digitalWrite(PinRot_fL,HIGH);   // turn left motors
+  digitalWrite(PinRot_bL,LOW); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(8000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  else if ((angle>=225) && (angle<270))
+  {
+  digitalWrite(PinRot_fR,LOW);    // turn right motors
+  digitalWrite(PinRot_bR,HIGH);  
+  digitalWrite(PinRot_fL,HIGH);   // turn left motors
+  digitalWrite(PinRot_bL,LOW); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(6000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  else if ((angle>=270) && (angle<315))
+  {
+  digitalWrite(PinRot_fR,LOW);    // turn right motors
+  digitalWrite(PinRot_bR,HIGH);  
+  digitalWrite(PinRot_fL,HIGH);   // turn left motors
+  digitalWrite(PinRot_bL,LOW); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(4000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  else if ((angle>=315) && (angle<360))
+  {
+  digitalWrite(PinRot_fR,LOW);    // turn right motors
+  digitalWrite(PinRot_bR,HIGH);  
+  digitalWrite(PinRot_fL,HIGH);   // turn left motors
+  digitalWrite(PinRot_bL,LOW); 
+  analogWrite(PinPWM_fR,50);   // provide power to right motors
+  analogWrite(PinPWM_bR,50);  
+  analogWrite(PinPWM_fL,50);   // provide power to left motors
+  analogWrite(PinPWM_bL,50);  
+  
+  delay(2000);
+
+  analogWrite(PinPWM_bL,LOW); // stop motors
+  analogWrite(PinPWM_bR,LOW); 
+  analogWrite(PinPWM_fL,LOW); 
+  analogWrite(PinPWM_fR,LOW);  
+  }
+  }
+  
+  /*else {
+  if (angle<45)
+  else if ((angle>=45) && (angle<90))
+  else if ((angle>=90) && (angle<135))
+  else if ((angle>=135) && (angle<180))
+  else if ((angle>=180) && (angle<225))
+  else if ((angle>=225) && (angle<270))
+  else if ((angle>=270) && (angle<315))
+  else if ((angle>=315) && (angle<360))
+  }*/
+
+  angle = 0;
+  direct = 0;
+
+/*forward movement
+digitalWrite(PinRot_bL,HIGH);   // turn all motors forward
+digitalWrite(PinRot_bR,HIGH);  
+digitalWrite(PinRot_fL,LOW); 
+digitalWrite(PinRot_fR,LOW); 
+analogWrite(PinPWM_bL,50);     // provide power to all motors
+analogWrite(PinPWM_bR,50);
+analogWrite(PinPWM_fL,50);
+analogWrite(PinPWM_fR,50);      
+delay(4000);
+
+
+analogWrite(PinPWM_bL,LOW); // stop motors
+analogWrite(PinPWM_bR,LOW); 
+analogWrite(PinPWM_fL,LOW); 
+analogWrite(PinPWM_fR,LOW); 
+delay(4000);
+
+
+digitalWrite(PinRot_bL,LOW);   // turn all motors forward
+digitalWrite(PinRot_bR,LOW);  
+digitalWrite(PinRot_fL,HIGH); 
+digitalWrite(PinRot_fR,HIGH); 
+analogWrite(PinPWM_bL,50);     // provide power to all motors
+analogWrite(PinPWM_bR,50);   
+analogWrite(PinPWM_fL,50); 
+analogWrite(PinPWM_fR,50); 
+delay(4000);
+
+
+analogWrite(PinPWM_bL,LOW); // stop motors
+analogWrite(PinPWM_bR,LOW); 
+analogWrite(PinPWM_fL,LOW); 
+analogWrite(PinPWM_fR,LOW); 
+delay(4000);
+
+
+
+digitalWrite(PinRot_fR,HIGH);   // turn right motors 
+digitalWrite(PinRot_bR,LOW);  
+digitalWrite(PinRot_fL,LOW);   // turn left motors
+digitalWrite(PinRot_bL,HIGH); 
+analogWrite(PinPWM_fR,50);   // provide power to right motors
+analogWrite(PinPWM_bR,50);  
+analogWrite(PinPWM_fL,50);   // provide power to left motors
+analogWrite(PinPWM_bL,50);  
+delay(4000);
+
+
+analogWrite(PinPWM_bL,LOW); // stop motors
+analogWrite(PinPWM_bR,LOW); 
+analogWrite(PinPWM_fL,LOW); 
+analogWrite(PinPWM_fR,LOW); 
+delay(4000);*/
+}
